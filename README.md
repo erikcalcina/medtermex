@@ -1,24 +1,15 @@
-# Deneir Script
+# Medical-LLM
 
-This is a template repository for creating an experiment environment in Python.
-It intends to speed up the research process - reducing the repository
-structure design - and to have it clean and concise through multiple
-experiments.
+This project focuses on developing and fine-tuning LLMs for medical tasks.
 
-Inspired by the [cookiecutter][cookiecutter] folder structure.
-
-**Instructions:**
-
-- Search for all TODOs in the project and add the appropriate values
-- Rename this README title and description
+Inspired by the [cookiecutter] folder structure.
 
 ## ☑️ Requirements
 
 Before starting the project make sure these requirements are available:
 
-- [conda][conda]. For setting up your research environment and Python dependencies.
-- [dvc][dvc]. For versioning your data.
-- [git][git]. For versioning your code.
+- [python]. For setting up the research environment and Python dependencies (version 3.8 or higher).
+- [git]. For versioning your code.
 
 ## 🛠️ Setup
 
@@ -41,21 +32,6 @@ source ./venv/bin/activate
 ./venv/Scripts/activate
 
 # deactivate the environment (UNIX & WINDOWS)
-deactivate
-```
-
-#### Using conda
-
-Install [conda], a program for creating Python virtual environments. Then run the following commands:
-
-```bash
-# create a new virtual environment
-conda create --name [TODO] python=3.8 pip
-
-# activate the environment
-conda activate [TODO]
-
-# deactivate the environment
 deactivate
 ```
 
@@ -82,18 +58,6 @@ To run the experiments, run the following commands:
 TODO: Provide scripts for the experiments
 ```
 
-### 🦉 Using DVC
-
-An alternative way of running the whole experiment is by using [DVC][dvc]. To do this,
-simply run:
-
-```bash
-dvc exp run
-```
-
-This command will read the `dvc.yaml` file and execute the stages accordingly, taking
-any dependencies into consideration.
-
 ### Results
 
 The results folder contains the experiment
@@ -116,35 +80,45 @@ TODO: Provide an example of how to use the model
 
 ## 📚 Papers
 
-In case you use any of the components for your research, please refer to
-(and cite) the papers:
+In case you use any of the components for your research, please refer to (and cite) the papers:
 
 TODO: Paper
 
 ### 📓 Related work
 
-TODO: Related paper
+#### Models
+
+[Chen, Zeming, et al. "MEDITRON-70B: Scaling Medical Pretraining for Large Language Models." arXiv preprint arXiv:2311.16079 (2023).](https://arxiv.org/abs/2311.16079)
+
+[Wang, Guangyu, et al. "ClinicalGPT: Large Language Models Finetuned with Diverse Medical Data and Comprehensive Evaluation." arXiv preprint arXiv:2306.09968 (2023).](https://arxiv.org/abs/2306.09968)
+
+[Wu, Chaoyi, et al. "Pmc-llama: Further finetuning llama on medical papers." arXiv preprint arXiv:2304.14454 (2023).](https://arxiv.org/abs/2304.14454)
+
+[Touvron, Hugo, et al. "Llama 2: Open foundation and fine-tuned chat models." arXiv preprint arXiv:2307.09288 (2023).](https://arxiv.org/abs/2307.09288)
+
+[Jiang, Albert Q., et al. "Mistral 7B." arXiv preprint arXiv:2310.06825 (2023).](https://arxiv.org/abs/2310.06825)
+
+#### Optimization Algorithms
+
+[Dettmers, Tim, et al. "Qlora: Efficient finetuning of quantized llms." arXiv preprint arXiv:2305.14314 (2023).](https://arxiv.org/abs/2305.14314)
 
 ## 🚧 Work In Progress
 
-- [ ] Setup script
-- [ ] Code for data prep
+- [ ] Code for data preparation
 - [ ] Code for model training
 - [ ] Code for model validation
 - [ ] Code for model evaluation
-- [ ] Modify `params.yaml` and modify the scripts to read the params from the file
-- [ ] Modify DVC pipelines for model training and evaluation
 
 ## 📣 Acknowledgments
 
 This work is developed by [Department of Artificial Intelligence][ailab] at [Jozef Stefan Institute][ijs].
 
-This work is supported by the Slovenian Research Agency and the TODO.
+This work is supported by the Slovenian Research Agency and the Horizon Europe [PREPARE] project [[Grant No. 101080288][grant]].
 
 [cookiecutter]: https://drivendata.github.io/cookiecutter-data-science/
 [python]: https://www.python.org/
-[conda]: https://www.anaconda.com/
 [git]: https://git-scm.com/
-[dvc]: https://dvc.org/
 [ailab]: http://ailab.ijs.si/
 [ijs]: https://www.ijs.si/
+[PREPARE]: https://prepare-rehab.eu/
+[grant]: https://cordis.europa.eu/project/id/101080288

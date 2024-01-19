@@ -1,13 +1,18 @@
+# notebook
+juyterlab
+ipywidgets>=7.5
+notebook
+# analysis
 numpy
 pandas
 spacy
-scikit-learn
+torch
+lightning
 transformers
 datasets
 matplotlib
-seaborn
-plotly
-tqdm
+datachart
+# utility
 python-dotenv
+tqdm
 black
-dvc
