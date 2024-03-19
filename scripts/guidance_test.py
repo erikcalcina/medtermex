@@ -6,8 +6,9 @@ from tqdm import tqdm
 from datasets import load_from_disk
 import sys
 sys.path.append("..")
-from scripts.generate import generate
+from scripts.guidance_generate import generate
 from collections import defaultdict
+from guidance import models, gen, select
 
 
 # EXAMPLE:  python test.py --model "AdaptLLM/medicine-chat" --adapter "../models/AdaptLLM/medicine-chat-Erik-shuffled/" --dataset "../data/datasetTestShuffledEntire" --output "../results/worktesting2"
@@ -21,17 +22,16 @@ def main(hparams):
     f = open(save_results+".txt", "w")
 
     #import model
-    device = "cuda"
-    #base_model_name = "AdaptLLM/medicine-chat" #path/to/your/model/or/name/on/hub"
-    #base_model_name = "BioMistral/BioMistral-7B"
-    #adapter_model_name = "../models/AdaptLLM/medicine-chat-Erik-shuffled"
+    #device = "cuda"
 
-    model = AutoModelForCausalLM.from_pretrained(base_model_name, load_in_4bit=True)
-    model = PeftModel.from_pretrained(model, adapter).to(device)
+    #model = AutoModelForCausalLM.from_pretrained(base_model_name, load_in_4bit=True)
+    #model = PeftModel.from_pretrained(model, adapter).to(device)
 
     tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     tokenizer.padding_side = 'right'
     tokenizer.pad_token = tokenizer.eos_token
+
+    model = models.Transformers(model=base_model_name, tokenizer=tokenizer, adapter=adapter, device="cuda", echo=False)
 
     #import test dataset
     test_dataset = load_from_disk(dataset)
@@ -44,16 +44,16 @@ def main(hparams):
     entities = ["Age", "Sex", "Sign_symptom", "Lab_value", "Biological_structure", "Diagnostic_procedure"]
 
     for instance in tqdm(range(len(test_dataset['input']))):
-        text = test_dataset['input'][instance]
-        #print(text)
 
-        extract = generate.extract(model, tokenizer, entities, text, max_length=2000)
-        #print(extract)
+        #Remove "strange" character (guidance returning error)
+        text = test_dataset['input'][instance].replace(" ", " ")
+
+        extract = generate.extract(model, entities, text, max_length=250)
 
         compare = compare + test_dataset[instance]["input"] + "\n\n"
 
         for x in json.loads(test_dataset['output'][instance]):
-            print(x)
+            #print(x)
 
             if x not in entities:
                 continue
