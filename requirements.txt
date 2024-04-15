@@ -22,4 +22,3 @@ trl
 python-dotenv
 tqdm
 black
-argparse
