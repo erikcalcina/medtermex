@@ -14,7 +14,7 @@ class Generate:
         return pred
     
     def json_format(pred):
-        #TODO: Solve possible issue with nested JSONs
+        # TODO: Solve possible issue with nested JSONs
         pred = pred.replace("\'", "\"")
         sep = "}"
         pred = pred.split(sep, 1)[0] + sep
@@ -40,4 +40,3 @@ class Generate:
                 print(e)
                 continue
         return output
-

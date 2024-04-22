@@ -62,9 +62,19 @@ TODO: Provide scripts for the experiments
 ```
 ## Examples of running our scripts
 
-Example of calling training_shuffled.py: python training_shuffled.py --model "AdaptLLM/medicine-chat" --dataset "../data/datasetTrainShuffled" --output "../models/AdaptLLM/medicine-chat" --project "PREPARE"
+Example of calling training_shuffled.py: 
+python scripts/training_shuffled.py \
+    --model AdaptLLM/medicine-chat \
+    --dataset ./data/datasetTrainShuffled \
+    --output ./models/AdaptLLM/medicine-chat \
+    --project PREPARE
 
-Example of calling test_model: python test.py --model "AdaptLLM/medicine-chat" --adapter "../models/AdaptLLM/medicine-chat/" --dataset "../data/datasetTest" --output "../results/worktesting"
+Example of calling test_model.py: 
+python scripts/test_model.py \
+    --model "AdaptLLM/medicine-chat" \
+    --adapter "./models/AdaptLLM/medicine-chat/" \
+    --dataset "./data/datasetTest" \
+    --output "./results/worktesting"
 
 ### Results
 

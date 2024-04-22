@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftConfig, PeftModel
 from guidance import models, gen, select
 
-#TODO: Resolve the scripts problem
+# TODO: Resolve the scripts problem
 sys.path.append("..")
 from src.models.guidance_generate import Generate
 
@@ -36,7 +36,7 @@ def main(hparams):
 
     model = models.Transformers(model, tokenizer, echo=False)
 
-    #Import test dataset
+    # Import test dataset
     test_dataset = load_from_disk(dataset)
 
     f1_score = defaultdict(list)
@@ -47,7 +47,7 @@ def main(hparams):
     entities = ["Age", "Sex", "Sign_symptom", "Lab_value", "Biological_structure", "Diagnostic_procedure"]
 
     for instance in tqdm(range(len(test_dataset['input']))):
-        #TODO: Remove "strange" character (guidance returning error)
+        # TODO: Remove "strange" character (guidance returning error)
         text = test_dataset['input'][instance].replace(" ", " ")
         text = text.replace("℃", "°C")
 

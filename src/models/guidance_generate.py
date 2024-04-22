@@ -13,7 +13,7 @@ class Generate:
         return lm["pred"]
 
     def json_format(pred):
-        #TODO: Solve possible issue with nested JSONs
+        # TODO: Solve possible issue with nested JSONs
         sep = "}"
         pred = pred.split(sep, 1)[0] + sep
         try:

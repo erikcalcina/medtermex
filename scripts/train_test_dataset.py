@@ -23,7 +23,6 @@ def main(hparams):
     # Tuple together same txt and ann files
     file_tuples = [(txt, txt[:-4] + '.ann') for txt in txt_files if txt[:-4] + '.ann' in ann_files]
 
-    #Relevant 
     mySet = {
         'Diagnostic_procedure',
         'Sign_symptom',
@@ -34,7 +33,7 @@ def main(hparams):
         'Sex',
     }
 
-    #shuffle our dataset
+    # Shuffle our dataset
     shuffled_file_tuples = random.sample(file_tuples, k=len(file_tuples))
 
     train_file_tuples = shuffled_file_tuples[:180]
@@ -74,14 +73,14 @@ def main(hparams):
                 listOfThings = ",".join([thing[1] for thing in group])
                 annDict[key] = listOfThings.split(",")
             
-            #Randomly selecting from 1 to max 5 entities (our keys).
+            # Randomly selecting from 1 to max 5 entities (our keys).
             number = random.randint(1,5)
             keys = random.sample(list(annDict), number)
 
             # Adding to dataframe (input (raw text), output (correct json), entities to extract (our keys divided by "," and ending with "."))
             df.loc[len(df.index)] = [Txtfile, json.dumps(dict((k, annDict[k]) for k in keys if k in annDict), ensure_ascii=False), ", ".join(keys) + "."]
 
-    # saving TRAIN DATASET
+    # Saving TRAIN DATASET
     hg_dataset = Dataset.from_pandas(df)
     hg_dataset = hg_dataset.remove_columns(['__index_level_0__'])
     hg_dataset.save_to_disk(train_save)
@@ -125,7 +124,7 @@ def main(hparams):
 
         df.loc[len(df.index)] = [Txtfile, dict(annDict), keys]
 
-    # saving TEST DATASET
+    # Saving TEST DATASET
     hg_dataset = Dataset.from_pandas(df)
     hg_dataset = hg_dataset.remove_columns(['__index_level_0__'])
     hg_dataset.save_to_disk(test_save)

@@ -1,6 +1,3 @@
-
-#TODO: Do not use start as global
-global START_PROMPT 
 START_PROMPT = "### Your goal is to extract structured information from the user's input that matches json format. When extracting information please make sure it matches the type information exactly. Extract the following entities: "
 
 class Prompts:

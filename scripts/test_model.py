@@ -10,7 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftConfig, PeftModel
 from guidance import models, gen, select
 
-#TODO: Resolve the scripts problem
+# TODO: Resolve the scripts problem
 sys.path.append("..")
 from src.models.generate import Generate
 
@@ -22,7 +22,7 @@ def main(hparams):
 
     f = open(save_results+".txt", "w")
 
-    #import model
+    # Import model
     device = "cuda"
     model = AutoModelForCausalLM.from_pretrained(base_model_name, load_in_4bit=True)
     model = PeftModel.from_pretrained(model, adapter).to(device)
@@ -31,7 +31,7 @@ def main(hparams):
     tokenizer.padding_side = 'right'
     tokenizer.pad_token = tokenizer.eos_token
 
-    #import test dataset
+    # Import test dataset
     test_dataset = load_from_disk(dataset)
 
     f1_score = defaultdict(list)
