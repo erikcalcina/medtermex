@@ -40,7 +40,7 @@ def find_word(sentence, vocabs):
 
     if len(output) == 0:
         return ""
-
+    
     return output
 
 def main(hparams):
@@ -50,7 +50,7 @@ def main(hparams):
 
     # Load excell data
     df = pd.read_excel(data)
-    df['Personal Medical History'] = df['Personal Medical History'].str.upper()
+    df['Personal Medical History upper'] = df['Personal Medical History'].str.upper()
     df = df[df['Personal Medical History'].notna()]
 
     # Load json vocabulary
@@ -62,9 +62,9 @@ def main(hparams):
     vocabs["measurements"].remove({'E': ['E']})
     vocabs["measurements"].remove({'A': ['A']})
 
-    tqdm.pandas(desc='My bar!')
+    tqdm.pandas(desc='Progress!')
 
-    df['output'] = df['Personal Medical History'].progress_apply(lambda x: find_word(x, vocabs))
+    df['output'] = df['Personal Medical History upper'].progress_apply(lambda x: find_word(x, vocabs))
 
     df1 = df.loc[df["output"]!='']
 
@@ -76,20 +76,12 @@ def main(hparams):
             for value in values:
                 index += 1
                 entitie = {}
-                if key != "DATE":
-                    entitie.update({"id": index})
-                    entitie.update({"label": key})
-                    entitie.update({"value": value[0]})
-                    entitie.update({"start_index": value[1][0]})
-                    entitie.update({"end_index": value[1][1]-1})
-                    entitie.update({"entity_connection_id": None})
-                if key == "DATE":
-                    entitie.update({"id": index})
-                    entitie.update({"label": "DATE"})
-                    entitie.update({"value": value[0]})
-                    entitie.update({"start_index": value[1][0]})
-                    entitie.update({"end_index": value[1][1]-1})
-                    entitie.update({"entity_connection_id": None})
+                entitie.update({"id": index})
+                entitie.update({"label": key})
+                entitie.update({"value": row["Personal Medical History"][value[1][0]:value[1][1]]})
+                entitie.update({"start_index": value[1][0]})
+                entitie.update({"end_index": value[1][1]-1})
+                entitie.update({"entity_connection_id": None})
                 entities.append(entitie)
 
         row_to_json = {
