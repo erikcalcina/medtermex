@@ -6,7 +6,7 @@ from collections import defaultdict
 import pandas as pd
 from tqdm import tqdm
 
-def find_number(sentence):
+def find_date_year(sentence):
     output = []
     pattern = r'\b\d{4}\b'
     matches = list(re.finditer(pattern, sentence))
@@ -34,7 +34,7 @@ def find_word(sentence, vocabs):
                             value = match[0]
                             output[key.upper()].append((value, span))
 
-    found_dates = find_number(sentence)
+    found_dates = find_date_year(sentence)
     if found_dates != "":
         output["DATE"].extend(found_dates)
 
@@ -69,7 +69,7 @@ def main(hparams):
     df1 = df.loc[df["output"]!='']
 
     data = []
-    for index, row in df1.iterrows():
+    for _, row in df1.iterrows():
         entities = []
         index = 0
         for key, values in row["output"].items():
