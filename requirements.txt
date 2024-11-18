@@ -1,24 +1,10 @@
-# notebook
-jupyterlab
-ipywidgets>=7.5
-notebook
-# analysis
+# common dependencies
 numpy
 pandas
 spacy
 torch
-lightning
-transformers
+# dataset dependencies
 datasets
-matplotlib
-datachart
-jsonformer
-bitsandbytes
-kor
-json
-peft
-trl
 # utility
 python-dotenv
 tqdm
-black
