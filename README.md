@@ -25,12 +25,17 @@ The project is structured as follows:
 ```plaintext
 .
 ├── data/                   # Data used in the experiments
-├── models/                 # Trained models
-├── results/                # Results of the experiments
+├── common/                 # Common utilities and modules
 ├── projects/               # The different projects in the repository
+│   ├── gliner
+│   └── llama
+├── results/                # Results of the experiments
+├── models/                 # Trained models
 ├── .gitignore              # Files and directories to be ignored by git
 ├── README.md               # The main README file
-└── pyproject.toml          # Project configuration file
+├── requirements-dev.txt    # Development dependencies
+├── requirements.txt        # Project dependencies
+└── setup.py                # Setup script
 ```
 
 ## 🛠️ Setup

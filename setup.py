@@ -16,7 +16,7 @@ setup(
     description="The monorepo project setup",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_namespace_packages(include=["projects.*"]),
+    packages=find_namespace_packages(include=["common.*"]),
     install_requires=[
         req.strip() for req in requirements if req.strip() and not req.startswith("#")
     ],

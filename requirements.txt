@@ -3,15 +3,6 @@ numpy
 pandas
 spacy
 torch
-# gliner dependencies
-gliner
-# transformer dependencies
-transformers
-jsonformer
-bitsandbytes
-kor
-peft
-trl
 # dataset dependencies
 datasets
 # utility
