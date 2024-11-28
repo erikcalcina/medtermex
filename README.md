@@ -122,6 +122,14 @@ TODO: Provide information about the data used in the experiments
 - Where is the data found
 - How is the data structured
 
+## 🧪 Tests
+
+To run existing tests, use the following command:
+
+```bash
+python -m unittest discover test*
+```
+
 ## 🧹 Cleanup
 
 To cleanup the project, remove the virtual environment and generated files.
