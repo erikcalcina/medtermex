@@ -50,10 +50,14 @@ def main(args):
         ann_file_path = os.path.join(args.input_dir, f"{file_name}.ann")
         examples.append(process_example(txt_file_path, ann_file_path))
 
+    train_size = int(len(examples) * args.train_test_ratio)
+
+    dataset = {"train": examples[:train_size], "test": examples[train_size:]}
     # Save the dataset
-    Path(args.output_file).parent.mkdir(parents=True, exist_ok=True)
-    with open(args.output_file, "w", encoding="utf8") as f:
-        json.dump(examples, f, ensure_ascii=False, indent=4)
+    Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    for split, examples in dataset.items():
+        with open(Path(args.output_dir) / f"{split}.json", "w", encoding="utf8") as f:
+            json.dump(examples, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
@@ -61,6 +65,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--input_dir", type=str, help="path to the input dir containing the examples"
     )
-    parser.add_argument("--output_file", type=str, help="path to the output file")
+    parser.add_argument("--output_dir", type=str, help="path to the output file")
+    parser.add_argument("--train_test_ratio", type=float, default=0.8)
     args = parser.parse_args()
     main(args)
