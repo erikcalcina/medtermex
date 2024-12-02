@@ -2,7 +2,6 @@ import json
 from argparse import ArgumentParser
 from pathlib import Path
 
-import numpy as np
 import torch
 from gliner import GLiNER
 from tqdm import tqdm
@@ -26,47 +25,32 @@ def main(args):
     model.to(device)
 
     performances = {
-        "exact": {
-            "p": [],
-            "r": [],
-            "f1": [],
-        },
-        "relaxed": {
-            "p": [],
-            "r": [],
-            "f1": [],
-        },
-        "overlap": {
-            "p": [],
-            "r": [],
-            "f1": [],
-        },
+        "exact": {"p": 0.0, "r": 0.0, "f1": 0.0},
+        "relaxed": {"p": 0.0, "r": 0.0, "f1": 0.0},
+        "overlap": {"p": 0.0, "r": 0.0, "f1": 0.0},
     }
 
+    # change the labels only to include those that you want to evaluate
     labels = list(set([e["label"] for e in data for e in e["labels"]]))
 
+    true_ents = []
+    pred_ents = []
     for example in tqdm(data, desc="Processing examples"):
-        true_ents = example["labels"]
-        pred_ents = model.predict_entities(
-            example["text"], labels, threshold=args.threshold
+        true_ents.append(
+            [label for label in example["labels"] if label["label"] in labels]
         )
-
-        # evaluate the performance
-        for match_type in performances:
-            p, r, f1 = evaluate_ner_performance(
-                true_ents,
-                pred_ents,
-                match_type,
+        with torch.no_grad():
+            _pred_ents = model.predict_entities(
+                example["text"], labels, threshold=args.threshold
             )
-            performances[match_type]["p"].append(p)
-            performances[match_type]["r"].append(r)
-            performances[match_type]["f1"].append(f1)
+        pred_ents.append(_pred_ents)
 
+    # evaluate the performance
     for match_type in performances:
-        for metric in performances[match_type]:
-            performances[match_type][metric] = np.mean(
-                np.array(performances[match_type][metric])
-            )
+        p, r, f1 = evaluate_ner_performance(true_ents, pred_ents, match_type)
+        performances[match_type]["p"] = p
+        performances[match_type]["r"] = r
+        performances[match_type]["f1"] = f1
 
     Path(args.output_file).parent.mkdir(parents=True, exist_ok=True)
     with open(args.output_file, "w", encoding="utf8") as f:

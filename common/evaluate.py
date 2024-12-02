@@ -79,8 +79,11 @@ def _exact_ner_evaluation(
         pred_ents: List of predicted entities.
 
     Returns:
-        The precision, recall, and F1 score.
+        The true positives, false positives, and false negatives.
     """
+    if len(true_ents) == 0 and len(pred_ents) == 0:
+        return 1, 0, 0
+
     true_ents_set = set((ent["text"], ent["label"]) for ent in true_ents)
     pred_ents_set = set((ent["text"], ent["label"]) for ent in pred_ents)
 
@@ -88,8 +91,7 @@ def _exact_ner_evaluation(
     fp = len(pred_ents_set - true_ents_set)
     fn = len(true_ents_set - pred_ents_set)
 
-    p, r, f1 = compute_metrics(tp, fp, fn)
-    return p, r, f1
+    return tp, fp, fn
 
 
 def _relaxed_ner_evaluation(
@@ -105,8 +107,11 @@ def _relaxed_ner_evaluation(
         pred_ents: List of predicted entities.
 
     Returns:
-        The precision, recall, and F1 score.
+        The true positives, false positives, and false negatives.
     """
+    if len(true_ents) == 0 and len(pred_ents) == 0:
+        return 1, 0, 0
+
     true_ents_set = set((ent["text"], ent["label"]) for ent in true_ents)
     pred_ents_set = set((ent["text"], ent["label"]) for ent in pred_ents)
 
@@ -119,8 +124,7 @@ def _relaxed_ner_evaluation(
 
     fp = len(pred_ents_set) - tp
     fn = len(true_ents_set) - tp
-    p, r, f1 = compute_metrics(tp, fp, fn)
-    return p, r, f1
+    return tp, fp, fn
 
 
 def _overlap_ner_evaluation(
@@ -148,6 +152,8 @@ def _overlap_ner_evaluation(
         The precision, recall, and F1 score.
     """
 
+    if len(true_ents) == 0 and len(pred_ents) == 0:
+        return 1.0, 1.0, 1.0
     if len(true_ents) == 0 or len(pred_ents) == 0:
         return 0.0, 0.0, 0.0
 
@@ -170,8 +176,8 @@ def _overlap_ner_evaluation(
 
 
 def evaluate_ner_performance(
-    true_ents: List[Entity],
-    pred_ents: List[Entity],
+    true_ents: List[List[Entity]],
+    pred_ents: List[List[Entity]],
     match_type: Union[
         Literal["exact"], Literal["relaxed"], Literal["overlap"]
     ] = "exact",
@@ -186,12 +192,29 @@ def evaluate_ner_performance(
     Returns:
         The precision, recall, and F1 score.
     """
-    if match_type == "exact":
-        p, r, f1 = _exact_ner_evaluation(true_ents, pred_ents)
-    elif match_type == "relaxed":
-        p, r, f1 = _relaxed_ner_evaluation(true_ents, pred_ents)
-    elif match_type == "overlap":
-        p, r, f1 = _overlap_ner_evaluation(true_ents, pred_ents)
-    else:
+    if len(true_ents) != len(pred_ents):
+        raise ValueError("The number of true and predicted entities must be the same.")
+
+    if match_type not in ["exact", "relaxed", "overlap"]:
         raise ValueError(f"Unknown match_type method: {match_type}")
+
+    if match_type == "overlap":
+        p, r, f1 = 0.0, 0.0, 0.0
+        for true_ent, pred_ent in zip(true_ents, pred_ents):
+            _p, _r, _f1 = _overlap_ner_evaluation(true_ent, pred_ent)
+            p, r, f1 = p + _p, r + _r, f1 + _f1
+        p, r, f1 = p / len(true_ents), r / len(true_ents), f1 / len(true_ents)
+        return p, r, f1
+
+    if match_type == "exact":
+        eval_func = _exact_ner_evaluation
+    elif match_type == "relaxed":
+        eval_func = _relaxed_ner_evaluation
+
+    tp, fp, fn = 0, 0, 0
+    for true_ent, pred_ent in zip(true_ents, pred_ents):
+        _tp, _fp, _fn = eval_func(true_ent, pred_ent)
+        tp, fp, fn = tp + _tp, fp + _fp, fn + _fn
+
+    p, r, f1 = compute_metrics(tp, fp, fn)
     return p, r, f1

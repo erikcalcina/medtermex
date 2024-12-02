@@ -21,9 +21,9 @@ def main(args):
 
     # prepare the data examples
     random.shuffle(data)
-    train_data_size = int(len(data) * args.train_data_ratio)
+    train_data_size = int(len(data) * args.train_val_ratio)
     train_dataset = data[:train_data_size]
-    eval_dataset = data[train_data_size:]
+    val_dataset = data[train_data_size:]
 
     # load the device (GPU or CPU)
     device = torch.device(
@@ -59,7 +59,7 @@ def main(args):
         model=model,
         args=training_args,
         train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
+        eval_dataset=val_dataset,
         tokenizer=model.data_processor.transformer_tokenizer,
         data_collator=data_collator,
     )
@@ -93,10 +93,10 @@ if __name__ == "__main__":
         help="path to the output directory for the trained model",
     )
     parser.add_argument(
-        "--train_data_ratio",
+        "--train_val_ratio",
         type=float,
         default=0.8,
-        help="ratio of the training data",
+        help="ratio of the training/validation data",
     )
     parser.add_argument(
         "--num_train_epochs",
