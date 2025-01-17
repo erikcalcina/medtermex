@@ -10,10 +10,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
 
-#from projects.llama.src.utils.prompts import Prompts
-sys.path.append("..")
-from src.utils.prompts import Prompts
-
+from projects.llama.src.utils.prompts import Prompts
 Prompts = Prompts()
 
 def instructions_formatting_function(examples, tokenizer):
@@ -225,7 +222,6 @@ def main(args):
         "Subject"
     ]
     # Add prompt_type argument to parser before main()
-
 
     predictions = []
     for example in tqdm(data):
