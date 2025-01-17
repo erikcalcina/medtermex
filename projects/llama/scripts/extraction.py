@@ -143,7 +143,6 @@ def parse_response(response: str) -> str:
             return entities
     except json.JSONDecodeError:
         pass
-
     # Fallback for cases where strict JSON parsing fails
     try:
         # Extract lines containing the output explicitly
@@ -157,7 +156,6 @@ def parse_response(response: str) -> str:
                 return entities
     except json.JSONDecodeError:
         pass
-
     return []
 
 def extract_label(
@@ -226,62 +224,54 @@ def main(args):
         "Area",
         "Subject"
     ]
+    # Add prompt_type argument to parser before main()
+
+
     predictions = []
     for example in tqdm(data):
-        if args.adapter_name is None:
-            extracted_labels = []
+        text = example["text"]
+        extracted_labels = []
+        
+        if args.prompt_type in ["prompt_only", "few_shot_prompting"]:
             for label_to_extract in labels:
-                text = example["text"]
-                #prompt_type = "prompt_only"
-                prompt_type = "few_shot_prompting"
                 label = extract_label(
                     model,
                     tokenizer,
                     text,
                     label_to_extract,
-                    prompt_type,
+                    args.prompt_type,
                     temperature=args.temperature,
                     top_p=args.top_p,
                 )
                 extracted_labels.extend(label)
-                #print(exaple_labels)
-                example_dict = {
-                    "text": example["text"],
-                    "labels": extracted_labels
-                }
         else:
-            print("I am using a fine-tuned model to extract labels")
-            extracted_labels = []
-            text = example["text"]
-            prompt_type = "instruction_prompt"
-            #prompt_type = "conversational_prompt"
-            label = extract_label(
+            extracted_labels = extract_label(
                 model,
                 tokenizer,
                 text,
                 labels,
-                prompt_type,
+                args.prompt_type,
                 temperature=args.temperature,
                 top_p=args.top_p,
             )
-            extracted_labels.extend(label)
-            #print(exaple_labels)
-            example_dict = {
-                "text": example["text"],
-                "labels": label
-            }
-        predictions.append(example_dict)
+        
+        predictions.append({
+            "text": text,
+            "labels": extracted_labels
+        })
 
-    with open(args.output_file, "w", encoding="utf8") as json_file:
+    output_path = args.output_file if args.output_file.endswith('.json') else args.output_file + '.json'
+    with open(output_path, "w", encoding="utf8") as json_file:
         json.dump(predictions, json_file, ensure_ascii=False, indent=4)
     
-    
-
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("--model_name", type=str, default="HuggingFaceTB/SmolLM2-1.7B-Instruct", help="Name of the model to use.")
     parser.add_argument("--adapter_name", type=str, default=None, help="Name of the adapter to use.")
     parser.add_argument("--dataset", type=str, help="Test dataset.")
+    parser.add_argument("--prompt_type", type=str, default="prompt_only", 
+                       choices=["prompt_only", "few_shot_prompting", "instruction_prompt", "conversational_prompt"],
+                       help="Type of prompt to use")
     parser.add_argument("--output_file", type=str, help="Path to save the output JSON file with extracted labels.")
     parser.add_argument("--use_gpu", action="store_true", default=True, help="Flag to use GPU for inference.")
     parser.add_argument("--temperature", type=float, default=1.0, help="Temperature for generation.")
