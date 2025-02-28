@@ -3,6 +3,8 @@ numpy
 pandas
 spacy
 torch
+sentence-transformers
+matplotlib
 # dataset dependencies
 datasets
 # utility

@@ -1,15 +1,8 @@
 import numpy as np
-from typing_extensions import List, Literal, Tuple, TypedDict, Union
+from typing_extensions import List, Literal, Tuple, Union
 
-# ======================================
-# Typings
-# ======================================
-
-
-class Entity(TypedDict):
-    text: str
-    label: str
-
+from .models.nerbertscore import NERBERTScore
+from .types import Entity
 
 # ======================================
 # Helper functions
@@ -65,7 +58,7 @@ def longest_common_substring(text1: str, text2: str) -> float:
 
 
 # ======================================
-# NER evaluation functions
+# NER evaluation functions: F1 score
 # ======================================
 
 
@@ -122,8 +115,8 @@ def _relaxed_ner_evaluation(
                 tp += 1
                 break
 
-    fp = len(pred_ents_set) - tp
-    fn = len(true_ents_set) - tp
+    fp = max(len(pred_ents_set) - tp, 0)
+    fn = max(len(true_ents_set) - tp, 0)
     return tp, fp, fn
 
 
@@ -141,7 +134,6 @@ def _overlap_ner_evaluation(
         author={Tianyi Zhang* and Varsha Kishore* and Felix Wu* and Kilian Q. Weinberger and Yoav Artzi},
         booktitle={International Conference on Learning Representations},
         year={2020},
-        url={https://openreview.net/forum?id=SkeHuCVFDr}
     }
 
     Args:
@@ -157,15 +149,18 @@ def _overlap_ner_evaluation(
     if len(true_ents) == 0 or len(pred_ents) == 0:
         return 0.0, 0.0, 0.0
 
-    text_matrix = np.zeros((len(true_ents), len(pred_ents)))
-    label_matrix = np.zeros((len(true_ents), len(pred_ents)))
+    true_ents_set = set((ent["text"], ent["label"]) for ent in true_ents)
+    pred_ents_set = set((ent["text"], ent["label"]) for ent in pred_ents)
 
-    for i, true_ent in enumerate(true_ents):
-        for j, pred_ent in enumerate(pred_ents):
-            label_matrix[i, j] = true_ent["label"] == pred_ent["label"]
+    text_matrix = np.zeros((len(true_ents_set), len(pred_ents_set)))
+    label_matrix = np.zeros((len(true_ents_set), len(pred_ents_set)))
+
+    for i, true_ent in enumerate(true_ents_set):
+        for j, pred_ent in enumerate(pred_ents_set):
+            label_matrix[i, j] = true_ent[1] == pred_ent[1]
             text_matrix[i, j] = longest_common_substring(
-                true_ent["text"], pred_ent["text"]
-            ) / len(true_ent["text"])
+                true_ent[0], pred_ent[0]
+            ) / len(true_ent[0])
 
     matrix = text_matrix * label_matrix
     p = np.mean(np.max(matrix, axis=0))
@@ -181,6 +176,8 @@ def evaluate_ner_performance(
     match_type: Union[
         Literal["exact"], Literal["relaxed"], Literal["overlap"]
     ] = "exact",
+    skip_empty: bool = False,
+    transform_lowercase: bool = False,
 ) -> Tuple[float, float, float]:
     """Evaluate named entity recognition performance.
 
@@ -188,6 +185,7 @@ def evaluate_ner_performance(
         true_ents: List of true entities for each example.
         pred_ents: List of predicted entities for each example.
         match_type: The evaluation method to use, either "exact", "relaxed" or "overlap".
+        skip_empty: Whether to skip examples with no entities.
 
     Returns:
         The precision, recall, and F1 score.
@@ -197,6 +195,23 @@ def evaluate_ner_performance(
 
     if match_type not in ["exact", "relaxed", "overlap"]:
         raise ValueError(f"Unknown match_type method: {match_type}")
+
+    if skip_empty:
+        _true_ents, _pred_ents = [], []
+        for true_ent, pred_ent in zip(true_ents, pred_ents):
+            if len(true_ent) == 0:
+                continue
+            _true_ents.append(true_ent)
+            _pred_ents.append(pred_ent)
+        true_ents, pred_ents = _true_ents, _pred_ents
+
+    if transform_lowercase:
+        true_ents = [
+            [{**ent, "text": ent["text"].lower()} for ent in ents] for ents in true_ents
+        ]
+        pred_ents = [
+            [{**ent, "text": ent["text"].lower()} for ent in ents] for ents in pred_ents
+        ]
 
     if match_type == "overlap":
         p, r, f1 = 0.0, 0.0, 0.0
@@ -217,4 +232,60 @@ def evaluate_ner_performance(
         tp, fp, fn = tp + _tp, fp + _fp, fn + _fn
 
     p, r, f1 = compute_metrics(tp, fp, fn)
+    return p, r, f1
+
+
+# ======================================
+# NER evaluation functions: semantic
+# ======================================
+
+
+def _ner_semantic_matching(
+    true_ents: List[Entity], pred_ents: List[Entity], model: NERBERTScore
+) -> Tuple[float, float, float]:
+    """Gets the BERTScore-inspired semantic matching for named entities.
+
+    Args:
+        true_ents: List of true entities.
+        pred_ents: List of predicted entities.
+
+    Returns:
+        The precision, recall, and F1 score.
+    """
+    if len(true_ents) == 0 and len(pred_ents) == 0:
+        return 1.0, 1.0, 1.0
+    if len(true_ents) == 0 or len(pred_ents) == 0:
+        return 0.0, 0.0, 0.0
+
+    return model(true_ents, pred_ents)
+
+
+def evaluate_ner_semantic_matching(
+    true_ents: List[List[Entity]], pred_ents: List[List[Entity]], model: NERBERTScore
+) -> Tuple[float, float, float]:
+    """Evaluate the named entity semantic matching.
+
+    The function measures the semantic matching between the true and predicted entities.
+    inspiration for this algorithm comes from the following paper:
+
+    @inproceedings{bert-score,
+        title={BERTScore: Evaluating Text Generation with BERT},
+        author={Tianyi Zhang* and Varsha Kishore* and Felix Wu* and Kilian Q. Weinberger and Yoav Artzi},
+        booktitle={International Conference on Learning Representations},
+        year={2020},
+    }
+
+    Args:
+        true_ents: List of true entities.
+        pred_ents: List of predicted entities.
+
+    Returns:
+        The precision, recall, and F1 score of the semantic matching.
+    """
+
+    p, r, f1 = 0.0, 0.0, 0.0
+    for true_ent, pred_ent in zip(true_ents, pred_ents):
+        _p, _r, _f1 = _ner_semantic_matching(true_ent, pred_ent, model)
+        p, r, f1 = p + _p, r + _r, f1 + _f1
+    p, r, f1 = p / len(true_ents), r / len(true_ents), f1 / len(true_ents)
     return p, r, f1
