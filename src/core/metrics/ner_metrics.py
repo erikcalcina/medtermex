@@ -205,8 +205,8 @@ def _bertscore_ner_evaluation(
     text_matrix = np.zeros((len(true_ents_set), len(pred_ents_set)))
     for i, true_ent in enumerate(true_ents_set):
         for j, pred_ent in enumerate(pred_ents_set):
-            label_matrix[i, j] = true_ent["label"] == pred_ent["label"]
-            text_matrix[i, j] = _longest_common_substring(true_ent["text"], pred_ent["text"])
+            label_matrix[i, j] = true_ent[1] == pred_ent[1]
+            text_matrix[i, j] = _longest_common_substring(true_ent[0], pred_ent[0])
 
     matrix = text_matrix * label_matrix
     p = np.mean(np.max(matrix, axis=0))

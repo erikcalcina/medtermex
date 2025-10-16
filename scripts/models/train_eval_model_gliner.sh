@@ -83,4 +83,4 @@ uv run python -m src.training.evaluate_gliner \
     --model-dir ${TRAIN_OUTPUT_DIR} \
     --eval-threshold ${EVAL_THRESHOLD} \
     --eval-metrics ${EVAL_METRICS} \
-    --use-cpu ${EVAL_USE_CPU}1
+    --use-cpu ${EVAL_USE_CPU}

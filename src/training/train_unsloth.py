@@ -278,7 +278,7 @@ def main(args):
     # update the trainer to use the chat template
     trainer = train_on_responses_only(
         trainer,
-        **get_train_on_responses_only_params(tokenizer, args.model_name),
+        **get_train_on_responses_only_params(tokenizer, args.model_name_or_path),
     )
 
     logger.info("Starting the training...")

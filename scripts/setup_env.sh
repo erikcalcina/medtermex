@@ -9,6 +9,19 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Read Python version from .python-version file
+if [ -f "./.python-version" ]; then
+    PYTHON_VERSION=$(cat ./.python-version 2>/dev/null | tr -d '\n\r' | xargs)
+    # Validate format is X.Y (major.minor only)
+    if [[ ! $PYTHON_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+        echo -e "${YELLOW}Invalid Python version format in .python-version: '$PYTHON_VERSION'. Using default 3.12${NC}"
+        PYTHON_VERSION="3.12"
+    fi
+else
+    echo -e "${YELLOW}.python-version file not found. Using default Python version 3.12${NC}"
+    PYTHON_VERSION="3.12"
+fi
+
 echo -e "${GREEN}Setting up development environment...${NC}"
 
 # Define Python version from params or use default
@@ -17,20 +30,38 @@ VENV_NAME=".venv"
 # Create virtual environment
 echo -e "${GREEN}Creating virtual environment...${NC}"
 if [ ! -d "./$VENV_NAME" ]; then
+    VENV_NEEDS_CREATION=true
+else
+    # Check if existing venv matches the specified Python version
+    if [ -f "./$VENV_NAME/bin/python" ]; then
+        VENV_PYTHON_VERSION=$("./$VENV_NAME/bin/python" --version 2>&1 | awk '{print $2}' | cut -d. -f1,2)
+        if [ "$VENV_PYTHON_VERSION" != "$PYTHON_VERSION" ]; then
+            echo -e "${YELLOW}Virtual environment uses Python $VENV_PYTHON_VERSION but Python $PYTHON_VERSION is required. Reinitializing...${NC}"
+            rm -rf "./$VENV_NAME"
+            VENV_NEEDS_CREATION=true
+        fi
+    else
+        echo -e "${YELLOW}Virtual environment is corrupted. Reinitializing...${NC}"
+        rm -rf "./$VENV_NAME"
+        VENV_NEEDS_CREATION=true
+    fi
+fi
+
+if [ "$VENV_NEEDS_CREATION" = true ]; then
     if command -v uv &> /dev/null; then
         echo -e "${GREEN}Using uv for virtual environment creation...${NC}"
-        uv venv $VENV_NAME --python 3.12
+        uv venv $VENV_NAME --python $PYTHON_VERSION
     else
         echo -e "${YELLOW}uv not found, falling back to python...${NC}"
-        if ! command -v python3.12 &> /dev/null; then
-            echo -e "${RED}Python 3.12 is not installed. Please install Python 3.12 and try again.${RED}"
+        if ! command -v python${PYTHON_VERSION} &> /dev/null; then
+            echo -e "${RED}Python ${PYTHON_VERSION} is not installed. Please install Python ${PYTHON_VERSION} and try again.${RED}"
             exit 1
         fi
-        python3.12 -m venv ./$VENV_NAME
+        python${PYTHON_VERSION} -m venv ./$VENV_NAME
     fi
     echo "Virtual environment created at $VENV_NAME"
 else
-    echo "Virtual environment already exists at $VENV_NAME"
+    echo "Virtual environment already exists at $VENV_NAME with Python $PYTHON_VERSION"
 fi
 
 # Activate virtual environment depending on the OS
@@ -44,14 +75,14 @@ fi
 if command -v uv &> /dev/null; then
     echo -e "${GREEN}Using uv for package management...${NC}"
     # Install project in development mode using uv
-    uv pip install -e .[dev]
+    uv pip install -e .[all]
 else
     echo -e "${YELLOW}uv not found, falling back to pip...${NC}"
     # Upgrade pip
     echo -e "${GREEN}Upgrading pip...${NC}"
     pip install --upgrade pip
     # Install project in development mode using pip
-    pip install -e .[dev]
+    pip install -e .[all]
 fi
 
 # Create necessary directories if they don't exist

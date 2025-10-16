@@ -43,9 +43,6 @@ LANGUAGE=[language]
 # Load the training dataset file
 EVAL_DATASET_FILE_PATH=${BASE_STORAGE_DIR}/${DATASET_DIR}/${TEST_DATASET_FILE}
 
-# Model store name
-MODEL_STORE_NAME="ollama/${MODEL_NAME}"
-
 # Load the test output directory
 TEST_OUTPUT_DIR=${BASE_PROJECT_DIR}/${RESULTS_DIR}/${MODEL_STORE_NAME}
 

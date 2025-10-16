@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=TNERUNEMC                      # Name of the job
-#SBATCH --account=s25r04-01-users                 # Account name
+#SBATCH --account=[account_name]                  # Account name
 #SBATCH --output=logs/train-model-unsloth-%j.out  # Standard output file (%j = job ID)
 #SBATCH --error=logs/train-model-unsloth-%j.out   # Standard error file (same as output file) (change to .err if you want to separate the output and error logs)
 #SBATCH --time=06:00:00                           # Time limit (format: HH:MM:SS)

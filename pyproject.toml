@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = "medtermex"
-version = "0.1.0"
+version = "0.2.0"
 description = "A project for training and evaluating medical term extraction models"
 requires-python = ">=3.10"
 authors = [
@@ -48,6 +48,8 @@ dev = [
     "flake8-pyproject",
     "pre-commit"
 ]
+
+all = ["medtermex[dev]"]
 
 [tool.black]
 line-length = 120
