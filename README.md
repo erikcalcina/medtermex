@@ -5,17 +5,13 @@
 **Medical Term Extraction using Artificial Intelligence.**
 This project focuses on developing and fine-tuning models for medical term extraction.
 
-## 📚 Papers
-
-In case you use any of the components for your research, please refer to (and cite) the papers:
-
-TODO: Paper
+The project currently supports GLiNER, LLMs (using Unsloth) and Ollama models. It includes scripts for fine-tuning using LoRA, and provides examples for fine-tuning the models both locally and on [SLURM].
 
 ## ☑️ Requirements
 
 Before starting the project make sure these requirements are available:
 
-- [python]. For setting up the research environment and Python dependencies (version 3.10 or higher).
+- [uv] or [python] (version 3.10 or higher). For setting up the environment and Python dependencies.
 - [git]. For versioning your code.
 
 ## 📁 Project Structure
@@ -25,133 +21,116 @@ The project is structured as follows:
 ```plaintext
 .
 ├── data/                   # Data used in the experiments
-├── common/                 # Common utilities and modules
-├── projects/               # The different projects in the repository
-│   ├── gliner
-│   └── llama
+│   ├── raw/                # Raw data
+│   ├── interim/            # Intermediate data
+│   ├── final/              # Final processed data
+│   ├── external/           # External data
+│   └── README.md           # Data documentation
+├── src/                    # Source code
+│   ├── core/               # Core modules and utilities
+│   ├── pipelines/          # Data and processing pipelines
+│   └── training/           # Training modules
+├── scripts/                # Utility scripts
+├── docs/                   # Documentation
 ├── results/                # Results of the experiments
 ├── models/                 # Trained models
+├── logs/                   # Log files
+├── slurm/                  # SLURM job scripts
 ├── .gitignore              # Files and directories to be ignored by git
 ├── README.md               # The main README file
-├── requirements-dev.txt    # Development dependencies
-├── requirements.txt        # Project dependencies
-└── setup.py                # Setup script
+├── Makefile                # Make targets for setup, cleanup, and linting
+├── pyproject.toml          # Project configuration
+├── setup.cfg               # Setup configuration
+├── requirements.txt        # Python dependencies
+├── .python-version         # Python version specification
+├── CHANGELOG.md            # Project changelog
+├── LICENSE                 # Project license
+└── SLURM.md                # SLURM documentation
 ```
 
 ## 🛠️ Setup
 
-### Create a python environment
+### Python version
 
-First, create a virtual environment where all the modules will be stored.
+The Python version for this project is specified in the `.python-version` file. This file should contain only the major and minor version number (e.g., `3.12`).
 
-#### Using virtualenv
+If the `.python-version` file is not present or contains an invalid format, the setup script will default to Python 3.12.
 
-Using the `venv` command, run the following commands:
+To change the Python version:
 
-```bash
-# create a new virtual environment
-python -m venv venv
+1. Create and/or edit the `.python-version` file in project root
+2. Specify the desired version in `X.Y` format (e.g., `3.10`, `3.11`, `3.12`, `3.13`)
+3. Re-run the setup process (see below)
 
-# activate the environment (UNIX)
-. ./venv/bin/activate
+### Setup the environment
 
-# activate the environment (WINDOWS)
-./venv/Scripts/activate
-
-# deactivate the environment (UNIX & WINDOWS)
-deactivate
-```
-
-### Install
-
-Since the project is a monorepo, we will install the dependencies in the following way:
+To set up the development environment, run the following command:
 
 ```bash
-# install the general dependencies
-pip install -e .[dev]
+make setup
 ```
+
+This will:
+
+- Create a virtual environment at `.venv`
+- Install all project dependencies (using `uv` if available, otherwise `pip`)
+- Create necessary data directories (`data/raw`, `data/interim`, `data/final`, `data/external`)
 
 > [!NOTE]
-> The `dev` extra installs the development dependencies.
-
-Next, install the dependencies for the projects:
-
-```bash
-# install all projects' dependencies
-pip install -e projects/*
-```
-
-> [!NOTE]
-> You can install separate projects by running `pip install -e projects/<project_name>`.
-> See the [Projects](#-Projects) section for more information.
-
-#### Adding a new project
-
-To add a new project, add the project to the `projects` directory and install the project dependencies.
-
-```bash
-pip install -e projects/<project_name>
-```
-
-### Install the pre-commit hooks
-
-To install the pre-commit hooks, run the following command:
-
-```bash
-pre-commit install
-```
+> The Python version is specified in `.python-version`. The setup script will use this version automatically.
 
 ## ⚙️ Environment Variables
 
-Some of the projects require environment variables to be set (see individual projects for details). To set the environment variables, copy the `.env.example` file to `.env` and replace the values with the correct ones.
+Some components may require environment variables to be set. To set the environment variables, copy the `.env.example` file (if available) to `.env` and replace the values with the correct ones.
 
-## 🚀 Projects
+## 🚀 Running Scripts
 
-The repository contains multiple projects, each associated with their own way of
-extracting medical terms. Each project is located in the `projects` directory.
+Documentation of the different supporting models is available in [./docs/models](./docs/models).
 
-Currently, the following projects are available:
+Scripts and experiments in this project are run using:
 
-- [gliner](projects/gliner/README.md). Medical term extraction using the GLiNER models.
-- [llama](projects/llama/README.md). Medical term extraction using the Llama models.
+- [uv] (default, if available): Fast Python script execution
+- [python] (fallback): Regular Python interpreter
 
-## 🗃️ Data
-
-TODO: Provide information about the data used in the experiments
-
-- Where is the data found
-- How is the data structured
-
-## 🧪 Tests
-
-To run existing tests, use the following command:
+Both are supported. When [uv] is available, it will automatically be used for faster execution. You can explicitly use either:
 
 ```bash
-python -m unittest discover test*
+# Using uv (faster)
+uv run script_name.py
+
+# Using python (always available)
+python script_name.py
 ```
 
 ## 🧹 Cleanup
 
-To cleanup the project, remove the virtual environment and generated files.
+To clean up the project, run the following command:
 
 ```bash
-# deactivate the environment
-deactivate
-# remove the virtual environment
-rm -rf venv
-# remove the generated files
-find . -type d -name '*.egg-info' -exec rm -rf {} +
+make cleanup
 ```
+
+This will remove generated files, caches, and compiled Python files.
 
 ## 📣 Acknowledgments
 
-This work is developed by [Department of Artificial Intelligence][ailab] at [Jozef Stefan Institute][ijs].
+This work is developed by the [Department of Artificial Intelligence][ailab] at [Jozef Stefan Institute][ijs], and other contributors.
 
-This work is supported by the Slovenian Research Agency and the Horizon Europe [PREPARE] project [[Grant No. 101080288][grant]].
+This work is supported by the Slovenian Research Agency.
+The project has received funding from the European Union's Horizon Europe research
+and innovation programme under [[Grant No. 101080288][PREPARE-GRANT]] ([PREPARE]).
 
+<figure>
+  <img src="./docs/assets/imgs/EU.png?raw=true" alt=European Union flag" width="80" />
+</figure>
+
+[SLURM]: https://slurm.schedmd.com/documentation.html
+
+[uv]: https://docs.astral.sh/uv/
 [python]: https://www.python.org/
 [git]: https://git-scm.com/
+
 [ailab]: http://ailab.ijs.si/
 [ijs]: https://www.ijs.si/
 [PREPARE]: https://prepare-rehab.eu/
-[grant]: https://cordis.europa.eu/project/id/101080288
+[PREPARE-GRANT]: https://cordis.europa.eu/project/id/101080288
