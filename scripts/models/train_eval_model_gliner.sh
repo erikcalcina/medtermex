@@ -112,7 +112,7 @@ $RUN_PYTHON -m src.training.train_gliner \
     --train-dataset-file ${TRAIN_DATASET_FILE_PATH} \
     --model-name-or-path ${MODEL} \
     --model-output-dir ${TRAIN_OUTPUT_DIR} \
-    --num-train-epochs ${TRAIN_NUM_EPOCHS} \
+    --train-num-epochs ${TRAIN_NUM_EPOCHS} \
     --train-batch-size ${TRAIN_BATCH_SIZE} \
     --train-learning-rate ${TRAIN_LEARNING_RATE} \
     --train-weight-decay ${TRAIN_WEIGHT_DECAY} \
